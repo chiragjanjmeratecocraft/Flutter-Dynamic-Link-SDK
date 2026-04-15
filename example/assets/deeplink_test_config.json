@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "description": "Test matrix for my_deeplink_sdk example app — edit URLs and short codes to match your backend.",
+    "android_application_id": "com.tecocraft.sdk.my_deeplink_sdk_example",
+    "ios_note": "Custom scheme mydeeplinksdk is registered in Info.plist. Universal Links for https require Associated Domains + AASA on the host.",
+    "routing_note": "Keys live in the API link payload field `data` (SDK: customData). The URL/short_code only picks which link to load — use two dashboard links with different `data` (e.g. {\"Vande\":\"Matram\"} vs {\"Bharat\":\"Mahan\"}) for two screens. If one link returns both keys, the example opens Vande first, then you can extend the mapper."
+  },
+  "sdk_init": {
+    "app_id": "com.tecocraft.sdk.my_deeplink_sdk_example",
+    "path_short_code_hosts": ["backend-dynamiclink.tecocraft.us"]
+  },
+  "sample_short_code": "GGkuXr",
+  "sample_api_response_shape": {
+    "statusCode": 200,
+    "data": {
+      "link_id": "(uuid from API)",
+      "name": "milk",
+      "description": "Product",
+      "short_code": "GGkuXr",
+      "custom_domain": null,
+      "projectId": "755ce191-c885-40d9-87d1-d059d75f681a",
+      "android_scheme": "(from API)",
+      "ios_scheme": "(from API)",
+      "desktop_link": null,
+      "data": {
+        "screen": "product",
+        "product_id": "SKU-10024",
+        "campaign_id": "SUMMER-2026"
+      },
+      "project": {
+        "id": "755ce191-c885-40d9-87d1-d059d75f681a",
+        "name": "music_app",
+        "description": "Testing the music",
+        "on_playstore": true,
+        "on_appstore": true,
+        "android_package_name": "(from API)",
+        "ios_bundle_id": "(from API)",
+        "default_url": "(from API)",
+        "android_fallback_url": "(from API)",
+        "ios_fallback_url": "(from API)"
+      }
+    },
+    "message": "Link fetched successfully",
+    "success": true
+  },
+  "test_urls": [
+    {
+      "id": "https_path_short_code",
+      "title": "HTTPS — short code in path (dashboard link)",
+      "url": "https://backend-dynamiclink.tecocraft.us/GGkuXr",
+      "notes": "Opens in browser if App Link is not verified. Use adb to force-open the app, or custom-scheme tests first."
+    },
+    {
+      "id": "custom_scheme_query",
+      "title": "Custom scheme — short_code query",
+      "url": "mydeeplinksdk://open?short_code=GGkuXr",
+      "notes": "Most reliable for emulator/device without assetlinks."
+    },
+    {
+      "id": "custom_scheme_demo_host",
+      "title": "Custom scheme — demo host + query",
+      "url": "mydeeplinksdk://demo?short_code=GGkuXr",
+      "notes": "Same as above; host is ignored by the SDK (query carries the code)."
+    }
+  ],
+  "adb": {
+    "android_https": "adb shell am start -a android.intent.action.VIEW -d \"https://backend-dynamiclink.tecocraft.us/GGkuXr\" com.tecocraft.sdk.my_deeplink_sdk_example",
+    "android_custom_query": "adb shell am start -a android.intent.action.VIEW -d \"mydeeplinksdk://open?short_code=GGkuXr\" com.tecocraft.sdk.my_deeplink_sdk_example"
+  }
+}

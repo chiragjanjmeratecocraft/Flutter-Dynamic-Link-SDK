@@ -1,0 +1,9 @@
+# Exclude non-Flutter reference repo
+RN-Dynamic-Link-SDK-main/
+
+# Local/generated folders
+**/.dart_tool/
+**/build/
+**/.idea/
+**/.vscode/
+**/*.iml
