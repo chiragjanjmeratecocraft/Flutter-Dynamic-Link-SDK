@@ -1,0 +1,48 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore build tools & caches
+.turbo/
+.yarn/
+.pnp.*
+.npmrc
+.yarnrc.yml
+.yarnrc
+.yarn-integrity
+.cache/
+dist/
+
+# Ignore test files
+__tests__/
+coverage/
+*.test.ts
+*.spec.ts
+*.snap
+
+# Ignore example app
+example/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore configs not needed in published package
+babel.config.js
+tsconfig.json
+tsconfig.build.json
+turbo.json
+eslint.config.*
+.prettierrc*
+.editorconfig
+.watchmanconfig
+lefthook.yml
+
+# Ignore GitHub & CI/CD configs
+.github/
+.gitignore
+.gitattributes
+
+# Ignore logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

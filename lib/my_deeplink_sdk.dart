@@ -149,10 +149,15 @@ class MyDeeplinkSdk {
     return _backend.postPendingRedirect();
   }
 
-  /// Typed pending-redirect envelope. `data` may be null.
-  static Future<DynamicLinkEnvelope> postPendingRedirectTyped() async {
+  /// Typed version of [postPendingRedirect], using the same model as code lookup.
+  static Future<DynamicLinkData> postPendingRedirectTyped() async {
     final envelope = await _backend.postPendingRedirectEnvelope();
-    return DynamicLinkEnvelope.fromJson(envelope);
+    final parsed = DynamicLinkEnvelope.fromJson(envelope);
+    final data = parsed.data;
+    if (data == null) {
+      throw const FormatException('Expected non-null data for pending redirect response');
+    }
+    return data;
   }
 
   /// RN parity alias for [postPendingRedirect].
@@ -160,8 +165,8 @@ class MyDeeplinkSdk {
     return postPendingRedirect();
   }
 
-  /// RN parity alias (typed envelope).
-  static Future<DynamicLinkEnvelope> trackPendingRedirectTyped() {
+  /// RN parity alias (typed).
+  static Future<DynamicLinkData> trackPendingRedirectTyped() {
     return postPendingRedirectTyped();
   }
 
@@ -270,17 +275,13 @@ class MyDeeplinkSdk {
 
     try {
       debugPrint('MyDeeplinkSdk.pendingRedirect: calling POST /api/links/pending-redirect');
-      final envelope = await trackPendingRedirectTyped();
+      final data = await trackPendingRedirectTyped();
       debugPrint(
         'MyDeeplinkSdk.pendingRedirect: response '
-        'statusCode=${envelope.statusCode} success=${envelope.success} '
-        'message="${envelope.message}" dataShortCode=${envelope.data?.shortCode} '
-        'customData=${envelope.data?.customData}',
+        'dataShortCode=${data.shortCode} '
+        'customData=${data.customData}',
       );
-      final data = envelope.data;
-      if (data != null) {
-        options.onSuccess?.call(data);
-      }
+      options.onSuccess?.call(data);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_hasFirstInstallStorageKey, true);
     } catch (error, stackTrace) {

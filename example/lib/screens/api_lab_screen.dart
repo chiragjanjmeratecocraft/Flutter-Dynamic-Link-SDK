@@ -87,17 +87,19 @@ class _ApiLabScreenState extends State<ApiLabScreen> {
     });
     widget.log.log('API: postPendingRedirectTyped()');
     try {
-      final env = await MyDeeplinkSdk.postPendingRedirectTyped();
+      final data = await MyDeeplinkSdk.postPendingRedirectTyped();
       setState(() {
         _output = const JsonEncoder.withIndent('  ').convert({
-          'statusCode': env.statusCode,
-          'success': env.success,
-          'message': env.message,
-          'hasData': env.data != null,
-          'dataShortCode': env.data?.shortCode,
+          'short_code': data.shortCode,
+          'link_id': data.linkId,
+          'customData': data.customData,
+          'project': {
+            'id': data.project.id,
+            'name': data.project.name,
+          },
         });
       });
-      widget.log.log('API: pending message=${env.message}');
+      widget.log.log('API: pending shortCode=${data.shortCode}');
     } catch (e, st) {
       setState(() {
         _output = '$e\n$st';

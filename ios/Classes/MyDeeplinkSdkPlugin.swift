@@ -22,14 +22,14 @@ public class MyDeeplinkSdkPlugin: NSObject, FlutterPlugin, FlutterApplicationLif
 
     let methods = FlutterMethodChannel(name: "my_deeplink_sdk_methods", binaryMessenger: registrar.messenger())
     methods.setMethodCallHandler { call, result in
-      instance.handleMethodCall(call, result: result)
+      instance.handle(call, result: result)
     }
 
     let events = FlutterEventChannel(name: "my_deeplink_sdk_events", binaryMessenger: registrar.messenger())
     events.setStreamHandler(instance)
   }
 
-  private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "init":
       initConfig = call.arguments as? [String: Any]
