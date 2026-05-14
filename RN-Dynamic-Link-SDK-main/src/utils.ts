@@ -31,7 +31,6 @@ export async function fetchDynamicLink(
 }
 
 export async function trackPendingRedirect(): Promise<IDynamicLinkResponse> {
-
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), TIMEOUT_DURATION);
 

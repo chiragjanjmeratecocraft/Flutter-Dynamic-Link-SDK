@@ -5,7 +5,6 @@ class TestUrlItem {
     required this.url,
     required this.notes,
   });
-
   final String id;
   final String title;
   final String url;
@@ -55,3 +54,6 @@ class DeeplinkTestConfig {
     );
   }
 }
+
+
+

@@ -154,6 +154,7 @@ class MyDeeplinkSdk {
     final envelope = await _backend.postPendingRedirectEnvelope();
     final parsed = DynamicLinkEnvelope.fromJson(envelope);
     final data = parsed.data;
+    debugPrint("this is post pending response data $data");
     if (data == null) {
       throw const FormatException('Expected non-null data for pending redirect response');
     }
