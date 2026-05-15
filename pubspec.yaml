@@ -11,9 +11,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  device_info_plus: ^13.1.0
+  device_info_plus: ^12.1.0
   http: ^1.6.0
-  package_info_plus: ^10.1.0
+#  package_info_plus: ^10.1.0
+  package_info_plus: ^9.0.0
   plugin_platform_interface: ^2.1.8
   shared_preferences: ^2.5.5
 
