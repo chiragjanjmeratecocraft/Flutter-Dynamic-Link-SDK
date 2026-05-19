@@ -86,7 +86,7 @@ class DynamicLinkBackendClient {
       'app_id': config.appId,
       'device_type': config.deviceType,
     });
-    final headers = _headers(includeJsonAccept: true, contentTypeJson: true);
+    final headers = _headers(includeJsonAccept: false, contentTypeJson: true);
     _logRequest(
       method: 'POST',
       uri: uri,
