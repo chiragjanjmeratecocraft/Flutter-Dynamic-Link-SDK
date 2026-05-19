@@ -68,7 +68,7 @@ class DynamicLinkBackendClient {
   }
 
   /// POST `/api/links/pending-redirect` returning full API envelope.
-  Future<Map<String, dynamic>> postPendingRedirectEnvelope() {
+  Future<Map<String, dynamic>> postPendingRedirectEnvelope() async {
     final config = _config;
     if (config == null) {
       throw StateError(
@@ -86,38 +86,37 @@ class DynamicLinkBackendClient {
       'app_id': config.appId,
       'device_type': config.deviceType,
     });
-    final headers = _headers(includeJsonAccept: false, contentTypeJson: true);
+    final headers = _headers(includeJsonAccept: true, contentTypeJson: true);
     _logRequest(
       method: 'POST',
       uri: uri,
       headers: headers,
       params: jsonDecode(body) as Map<String, dynamic>,
     );
-    return http
-        .post(
-          uri,
-          headers: headers,
-          body: body,
-        )
-        .timeout(_kRequestTimeout)
-        .then((res) {
-          final decoded = _decodeJsonObject(res);
-          _logResponse(method: 'POST', uri: uri, statusCode: res.statusCode, body: decoded);
-          return decoded;
-        })
-        .catchError((error) {
-          if (error is TimeoutException) {
-            debugPrint(
-              'MyDeeplinkSdk.http timeout\n'
-              '  method: POST\n'
-              '  url: $uri\n'
-              '  after: ${_kRequestTimeout.inSeconds}s',
-            );
-          } else {
-            debugPrint('MyDeeplinkSdk.http error\n  method: POST\n  url: $uri\n  error: $error');
-          }
-          throw error;
-        });
+
+    try {
+      final res = await http.post(uri, headers: headers, body: body).timeout(_kRequestTimeout);
+      final decodedResponse = _decodeJsonObject(res);                          // fix 2: renamed variable
+      _logResponse(method: 'POST', uri: uri, statusCode: res.statusCode, body: decodedResponse);
+
+      final shortCode = decodedResponse['data']['short_code'];                 // fix 3: added semicolon
+      debugPrint("this is short code after getting response $shortCode");
+
+      final linkDecoded = await getLinkByCodeEnvelope(shortCode);              // fix 1: await works now, fix 2: renamed variable
+      return linkDecoded;
+
+    } on TimeoutException {
+      debugPrint(
+        'MyDeeplinkSdk.http timeout\n'
+            '  method: POST\n'
+            '  url: $uri\n'
+            '  after: ${_kRequestTimeout.inSeconds}s',
+      );
+      rethrow;
+    } catch (error) {
+      debugPrint('MyDeeplinkSdk.http error\n  method: POST\n  url: $uri\n  error: $error');
+      rethrow;
+    }
   }
 
   void _logRequest({
