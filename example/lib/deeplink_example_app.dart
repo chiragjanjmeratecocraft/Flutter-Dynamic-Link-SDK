@@ -36,10 +36,13 @@ class _DeeplinkExampleAppState extends State<DeeplinkExampleApp> {
     if (nav == null) return;
 
     final payload = data.customData;
-    final screen = payload['screen']?.toString().trim().toLowerCase();
+    final screen = (payload['screen'] ?? payload['screen_name'])?.toString().trim().toLowerCase();
+    final productId = (payload['product_id'] ?? payload['productId'])?.toString();
+    final orderId = (payload['order_id'] ?? payload['orderId'])?.toString();
+    final campaignId = (payload['campaign_id'] ?? payload['campaignId'])?.toString();
 
-    if (screen == 'product' || payload['product_id'] != null) {
-      final id = payload['product_id']?.toString() ?? 'UNKNOWN';
+    if (screen == 'product' || screen == 'pages' || productId != null) {
+      final id = productId ?? 'UNKNOWN';
       final product = _demoProducts.firstWhere(
         (p) => p.id == id,
         orElse: () => Product(id: id, name: 'Product $id', price: 0, description: 'Product opened from deep link'),
@@ -48,15 +51,15 @@ class _DeeplinkExampleAppState extends State<DeeplinkExampleApp> {
       return;
     }
 
-    if (screen == 'order' || payload['order_id'] != null) {
-      final orderId = payload['order_id']?.toString() ?? 'UNKNOWN';
-      nav.push(MaterialPageRoute<void>(builder: (_) => OrderDetailsScreen(orderId: orderId)));
+    if (screen == 'order' || orderId != null) {
+      final id = orderId ?? 'UNKNOWN';
+      nav.push(MaterialPageRoute<void>(builder: (_) => OrderDetailsScreen(orderId: id)));
       return;
     }
 
-    if (screen == 'campaign' || payload['campaign_id'] != null) {
-      final campaignId = payload['campaign_id']?.toString() ?? 'GENERIC';
-      nav.push(MaterialPageRoute<void>(builder: (_) => CampaignScreen(campaignId: campaignId)));
+    if (screen == 'campaign' || campaignId != null) {
+      final id = campaignId ?? 'GENERIC';
+      nav.push(MaterialPageRoute<void>(builder: (_) => CampaignScreen(campaignId: id)));
     }
   }
 
@@ -66,10 +69,91 @@ class _DeeplinkExampleAppState extends State<DeeplinkExampleApp> {
     super.dispose();
   }
 
+  Future<void> _shareProduct(BuildContext context, Product product) async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final response = await MyDeeplinkSdk.generatePublicLink(
+        clientId: 'cli_8c3cc27f2c8f0e9fcec30f8f3b0044f00b6be4cd87929344e5d347b4cd8e219e',
+        body: {
+          "title": product.name,
+          "description": product.description,
+          "android_scheme": "TravelproductDetail",
+          "ios_scheme": "TravelproductDetail",
+          "data": {
+            "screen_name": "product",
+            "productId": product.id,
+          },
+        },
+      );
+
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+
+      final shortCode = response['data']['short_code'];
+      final generatedLink = '$kDefaultDynamicLinkBaseUrl/$shortCode';
+
+      if (mounted) {
+        print("this is result $generatedLink");
+        _showShareDialog(context, generatedLink);
+      }
+    } catch (e) {
+      if (mounted) {
+        // Close loading dialog if still open
+        //Navigator.pop(context);
+        print("this is error $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
+  void _showShareDialog(BuildContext context, String link) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Share Product'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Link generated successfully:'),
+            const SizedBox(height: 16),
+            SelectableText(
+              link,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.teal),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          FilledButton(
+            onPressed: () {
+              // You could use share_plus here if it was available
+              Navigator.pop(context);
+            },
+            child: const Text('Copy Link'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = <Widget>[
-      ShopHomeTab(products: _demoProducts),
+      ShopHomeTab(
+        products: _demoProducts,
+        onShare: (ctx, p) => _shareProduct(ctx, p),
+      ),
       const OrdersTab(),
       const ProfileTab(),
     ];
@@ -100,9 +184,14 @@ class _DeeplinkExampleAppState extends State<DeeplinkExampleApp> {
 }
 
 class ShopHomeTab extends StatelessWidget {
-  const ShopHomeTab({super.key, required this.products});
+  const ShopHomeTab({
+    super.key,
+    required this.products,
+    required this.onShare,
+  });
 
   final List<Product> products;
+  final Function(BuildContext, Product) onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +206,16 @@ class ShopHomeTab extends StatelessWidget {
             leading: CircleAvatar(child: Text(p.name[0])),
             title: Text(p.name),
             subtitle: Text(p.description),
-            trailing: Text('\$${p.price.toStringAsFixed(2)}'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('\$${p.price.toStringAsFixed(2)}'),
+                IconButton(
+                  icon: const Icon(Icons.share, size: 20),
+                  onPressed: () => onShare(context, p),
+                ),
+              ],
+            ),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => ProductDetailsScreen(product: p)),

@@ -61,6 +61,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>mydeeplinksdk</string>
+                <string>TravelproductDetail</string>
 			</array>
 		</dict>
 	</array>
