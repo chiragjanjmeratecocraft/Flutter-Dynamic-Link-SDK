@@ -5,7 +5,7 @@ homepage: https://github.com/tecocraft/my_deeplink_sdk
 repository: https://github.com/tecocraft/my_deeplink_sdk
 
 environment:
-  sdk: ^3.10.7
+  sdk: ^3.10.3
   flutter: '>=3.3.0'
 
 dependencies:

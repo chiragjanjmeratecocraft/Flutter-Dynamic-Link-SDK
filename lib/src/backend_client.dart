@@ -119,6 +119,44 @@ class DynamicLinkBackendClient {
     }
   }
 
+  /// POST `/api/links/public-link` with `clientId` and body.
+  Future<Map<String, dynamic>> generatePublicLink({
+    required String clientId,
+    required Map<String, dynamic> body,
+  }) async {
+    final base = _normalizeBase(_config?.baseUrl ?? kDefaultDynamicLinkBaseUrl);
+    final uri = Uri.parse('$base/api/links/public-link');
+    final headers = _headers(includeJsonAccept: true, contentTypeJson: true);
+    headers['clientId'] = clientId;
+
+    _logRequest(
+      method: 'POST',
+      uri: uri,
+      headers: headers,
+      params: body,
+    );
+
+    try {
+      final res = await http
+          .post(uri, headers: headers, body: jsonEncode(body))
+          .timeout(_kRequestTimeout);
+      final decoded = _decodeJsonObject(res);
+      _logResponse(method: 'POST', uri: uri, statusCode: res.statusCode, body: decoded);
+      return decoded;
+    } on TimeoutException {
+      debugPrint(
+        'MyDeeplinkSdk.http timeout\n'
+            '  method: POST\n'
+            '  url: $uri\n'
+            '  after: ${_kRequestTimeout.inSeconds}s',
+      );
+      rethrow;
+    } catch (error) {
+      debugPrint('MyDeeplinkSdk.http error\n  method: POST\n  url: $uri\n  error: $error');
+      rethrow;
+    }
+  }
+
   void _logRequest({
     required String method,
     required Uri uri,

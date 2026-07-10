@@ -170,6 +170,15 @@ class MyDeeplinkSdk {
     return postPendingRedirectTyped();
   }
 
+  /// Generates a public short link.
+  /// POST `https://…/api/links/public-link`
+  static Future<Map<String, dynamic>> generatePublicLink({
+    required String clientId,
+    required Map<String, dynamic> body,
+  }) {
+    return _backend.generatePublicLink(clientId: clientId, body: body);
+  }
+
   /// Retrieves the link that opened the app if it was killed/closed.
   static Future<String?> getInitialLink() async {
     return _methodChannel.invokeMethod<String>('getInitialLink');
