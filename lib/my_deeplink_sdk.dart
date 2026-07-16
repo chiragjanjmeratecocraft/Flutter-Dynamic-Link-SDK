@@ -293,11 +293,20 @@ class MyDeeplinkSdk {
       options.onSuccess?.call(data);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_hasFirstInstallStorageKey, true);
+    } on MyDeeplinkSdkNoPendingLinkException {
+      // This is NORMAL — the backend simply has no pending deferred link for this device.
+      // Android and iOS differ: iOS stores the intent natively; Android relies entirely
+      // on the backend. If the user opened the app directly (not via a link), data is null.
+      // We mark first-install as done so we don't keep calling the endpoint on every launch.
+      debugPrint('MyDeeplinkSdk.pendingRedirect: No pending link — silently skipping.');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_hasFirstInstallStorageKey, true);
     } catch (error, stackTrace) {
       debugPrint('MyDeeplinkSdk.pendingRedirect: error $error');
       options.onError?.call(error, stackTrace);
     }
   }
+
 
   static Future<void> _handleIncomingUrl(
     String url,

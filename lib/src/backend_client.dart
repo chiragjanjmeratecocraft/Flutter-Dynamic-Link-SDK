@@ -96,15 +96,30 @@ class DynamicLinkBackendClient {
 
     try {
       final res = await http.post(uri, headers: headers, body: body).timeout(_kRequestTimeout);
-      final decodedResponse = _decodeJsonObject(res);                          // fix 2: renamed variable
+      final decodedResponse = _decodeJsonObject(res);
       _logResponse(method: 'POST', uri: uri, statusCode: res.statusCode, body: decodedResponse);
 
-      final shortCode = decodedResponse['data']['short_code'];                 // fix 3: added semicolon
-      debugPrint("this is short code after getting response $shortCode");
+      // Guard: backend returns data:null when no pending link exists for this device.
+      // This is a valid 200 response, NOT an error — just means no deferred link to process.
+      final data = decodedResponse['data'];
+      if (data == null) {
+        debugPrint('MyDeeplinkSdk.pendingRedirect: No pending link for this device (data is null).');
+        throw const MyDeeplinkSdkNoPendingLinkException();
+      }
 
-      final linkDecoded = await getLinkByCodeEnvelope(shortCode);              // fix 1: await works now, fix 2: renamed variable
+      final shortCode = (data as Map<String, dynamic>)['short_code'] as String?;
+      if (shortCode == null || shortCode.trim().isEmpty) {
+        debugPrint('MyDeeplinkSdk.pendingRedirect: short_code missing in response data.');
+        throw const MyDeeplinkSdkNoPendingLinkException();
+      }
+
+      debugPrint('MyDeeplinkSdk.pendingRedirect: shortCode = $shortCode');
+
+      final linkDecoded = await getLinkByCodeEnvelope(shortCode);
       return linkDecoded;
 
+    } on MyDeeplinkSdkNoPendingLinkException {
+      rethrow;
     } on TimeoutException {
       debugPrint(
         'MyDeeplinkSdk.http timeout\n'
