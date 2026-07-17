@@ -99,27 +99,12 @@ class DynamicLinkBackendClient {
       final decodedResponse = _decodeJsonObject(res);
       _logResponse(method: 'POST', uri: uri, statusCode: res.statusCode, body: decodedResponse);
 
-      // Guard: backend returns data:null when no pending link exists for this device.
-      // This is a valid 200 response, NOT an error — just means no deferred link to process.
-      final data = decodedResponse['data'];
-      if (data == null) {
-        debugPrint('MyDeeplinkSdk.pendingRedirect: No pending link for this device (data is null).');
-        throw const MyDeeplinkSdkNoPendingLinkException();
-      }
-
-      final shortCode = (data as Map<String, dynamic>)['short_code'] as String?;
-      if (shortCode == null || shortCode.trim().isEmpty) {
-        debugPrint('MyDeeplinkSdk.pendingRedirect: short_code missing in response data.');
-        throw const MyDeeplinkSdkNoPendingLinkException();
-      }
-
-      debugPrint('MyDeeplinkSdk.pendingRedirect: shortCode = $shortCode');
+      final shortCode = decodedResponse['data']['short_code'];
+      debugPrint("this is short code after getting response $shortCode");
 
       final linkDecoded = await getLinkByCodeEnvelope(shortCode);
       return linkDecoded;
 
-    } on MyDeeplinkSdkNoPendingLinkException {
-      rethrow;
     } on TimeoutException {
       debugPrint(
         'MyDeeplinkSdk.http timeout\n'
