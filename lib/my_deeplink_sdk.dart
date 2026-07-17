@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:my_deeplink_sdk/src/exceptions.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'my_deeplink_sdk.dart';
 import 'my_deeplink_sdk_platform_interface.dart';
 import 'src/backend_client.dart';
 import 'src/models.dart';
