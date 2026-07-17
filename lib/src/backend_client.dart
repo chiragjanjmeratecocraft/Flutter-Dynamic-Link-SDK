@@ -8,7 +8,7 @@ import 'exceptions.dart';
 import 'sdk_config.dart';
 
 const String kDefaultDynamicLinkBaseUrl = 'https://backend-dynamiclink.tecocraft.us';
-const Duration _kRequestTimeout = Duration(seconds: 15);
+const Duration _kRequestTimeout = Duration(seconds: 60);
 
 /// Calls Tecocraft dynamic-link HTTP APIs.
 class DynamicLinkBackendClient {
@@ -38,6 +38,7 @@ class DynamicLinkBackendClient {
       params: <String, dynamic>{'short_code': code},
     );
     late final http.Response res;
+    debugPrint("this is after call");
     try {
       res = await http
           .get(
@@ -45,6 +46,7 @@ class DynamicLinkBackendClient {
             headers: headers,
           )
           .timeout(_kRequestTimeout);
+      debugPrint("this is on call $res");
     } on TimeoutException {
       debugPrint(
         'MyDeeplinkSdk.http timeout\n'
@@ -86,7 +88,7 @@ class DynamicLinkBackendClient {
       'app_id': config.appId,
       'device_type': config.deviceType,
     });
-    final headers = _headers(includeJsonAccept: false, contentTypeJson: true);
+    final headers = _headers(includeJsonAccept: false,);
     _logRequest(
       method: 'POST',
       uri: uri,
@@ -120,10 +122,7 @@ class DynamicLinkBackendClient {
   }
 
   /// POST `/api/links/public-link` with `clientId` and body.
-  Future<Map<String, dynamic>> generatePublicLink({
-    required String clientId,
-    required Map<String, dynamic> body,
-  }) async {
+  Future<Map<String, dynamic>> generatePublicLink({required String clientId, required Map<String, dynamic> body,}) async {
     final base = _normalizeBase(_config?.baseUrl ?? kDefaultDynamicLinkBaseUrl);
     final uri = Uri.parse('$base/api/links/public-link');
     final headers = _headers(includeJsonAccept: true, contentTypeJson: true);

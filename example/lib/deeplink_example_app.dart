@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_deeplink_sdk/my_deeplink_sdk.dart';
 
 import 'test_config_model.dart';
@@ -137,8 +138,14 @@ class _DeeplinkExampleAppState extends State<DeeplinkExampleApp> {
           ),
           FilledButton(
             onPressed: () {
-              // You could use share_plus here if it was available
-              Navigator.pop(context);
+              Clipboard.setData(ClipboardData(text: link)).then((_) {
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Link copied to clipboard')),
+                  );
+                }
+              });
             },
             child: const Text('Copy Link'),
           ),
